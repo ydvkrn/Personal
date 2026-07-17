@@ -3,27 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Masoom Ki Diary - Login</title>
+    <title>Masoom Ki Diary - Access</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #050505; color: #fff; font-family: 'Poppins', sans-serif; }
-        .neon-text { text-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff; color: #00e5ff; }
-        .neon-input:focus { box-shadow: 0 0 15px #00e5ff; border-color: #00e5ff; outline: none; }
-        .neon-btn { border: 2px solid #00e5ff; box-shadow: 0 0 10px #00e5ff inset, 0 0 10px #00e5ff; transition: all 0.3s ease; }
-        .neon-btn:hover { background-color: #00e5ff; color: #000; box-shadow: 0 0 25px #00e5ff inset, 0 0 25px #00e5ff; }
+        body { background-color: #000; color: #fff; font-family: 'Poppins', sans-serif; }
+        .crystal-box { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); backdrop-filter: blur(16px); box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); }
+        .crystal-input:focus { border-color: #ff003c; box-shadow: 0 0 15px rgba(255, 0, 60, 0.4); outline: none; }
+        .crystal-btn { background: #ff003c; color: #fff; box-shadow: 0 0 15px rgba(255, 0, 60, 0.4); transition: all 0.3s ease; }
+        .crystal-btn:hover { background: #fff; color: #000; box-shadow: 0 0 25px rgba(255, 255, 255, 0.6); }
     </style>
 </head>
-<body class="h-screen flex items-center justify-center bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-neutral-900 to-black">
-    <div class="w-full max-w-md p-10 bg-black/50 border border-neutral-800 rounded-2xl backdrop-blur-md shadow-2xl text-center">
-        <h1 class="text-3xl font-extrabold mb-8 uppercase tracking-widest neon-text">Masoom Ki Diary</h1>
+<body class="h-screen flex items-center justify-center bg-radial-gradient">
+    <div class="w-full max-w-md p-10 crystal-box rounded-3xl text-center mx-4">
+        <h1 class="text-3xl font-extrabold mb-2 tracking-widest uppercase text-white">Masoom Ki Diary</h1>
+        <p class="text-xs font-semibold tracking-widest text-neutral-500 mb-8 uppercase">Personal Portal</p>
         <form id="loginForm" class="space-y-6">
-            <input type="password" id="passcode" maxlength="8" placeholder="Enter Secret Passcode" required
-                class="w-full bg-black border border-neutral-700 text-center text-2xl py-3 rounded-lg text-white tracking-[0.5em] neon-input transition-all">
-            <button type="submit" id="submitBtn" class="w-full text-[#00e5ff] font-bold text-lg py-3 rounded-lg neon-btn uppercase tracking-wider">
+            <input type="password" id="passcode" maxlength="8" placeholder="••••••••" required
+                class="w-full bg-black/50 border border-neutral-800 text-center text-2xl py-3 rounded-xl text-white tracking-[0.3em] crystal-input transition-all font-mono">
+            <button type="submit" id="submitBtn" class="w-full font-bold text-sm py-4 rounded-xl crystal-btn uppercase tracking-widest">
                 Unlock Diary
             </button>
-            <p id="errorMsg" class="text-red-500 font-semibold text-sm hidden mt-2"></p>
+            <p id="errorMsg" class="text-[#ff003c] font-bold text-xs hidden mt-2 tracking-wider"></p>
         </form>
     </div>
 
@@ -42,7 +43,7 @@
 
             if (res.ok) window.location.href = '/';
             else {
-                error.textContent = "Incorrect Passcode!";
+                error.textContent = "INVALID PASSCODE";
                 error.classList.remove('hidden');
                 btn.textContent = "UNLOCK DIARY";
             }
