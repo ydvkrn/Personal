@@ -23,7 +23,7 @@
     </header>
 
     <!-- Full Image Adaptive Banner Box -->
-    <div id="bannerContainer" class="w-full bg-neutral-950 flex items-center justify-center border-b border-white/5 overflow-hidden">
+    <div id="bannerContainer" class="w-full bg-neutral-950 flex items-center justify-center border-b border-white/5">
         <div class="py-20"><span class="text-neutral-500 font-bold tracking-widest text-xs animate-pulse">LOADING PORTFOLIO...</span></div>
     </div>
 
@@ -47,33 +47,33 @@
 
         if (validBanners.length > 0) {
             let currentIdx = 0;
-            
-            // FIX 2: Cinematic Fade & Full Width
-            // h-full w-full object-cover = Full Screen Width
-            // bg-gradient-to-t = Niche se upar tak black fade effect
+
+            // FIX 2: Ab banner FULLY visible rahega (crop nahi hoga) — mobile aur laptop
+            // dono par apni natural aspect-ratio ke hisaab se adapt karega (object-contain + h-auto).
+            // max-height sirf itna control karta hai ki bahut lambi image screen se overflow na kare.
             bannerContainer.innerHTML = `
-            <div class="w-full h-[55vh] md:h-[75vh] relative bg-black overflow-hidden">
-                <img src="${validBanners[0]}" id="bannerImg" 
-                     class="absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-1000 ease-in-out opacity-100" />
-                
-                <!-- Professional Bottom Fade (Netflix Style) -->
-                <div class="absolute bottom-0 left-0 w-full h-2/3 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-10"></div>
-                <!-- Extra solid dark line at absolute bottom to match body bg -->
-                <div class="absolute bottom-0 left-0 w-full h-6 bg-black z-20"></div>
+            <div class="w-full relative bg-black">
+                <img src="${validBanners[0]}" id="bannerImg" alt="Banner"
+                     class="w-full h-auto max-h-[60vh] md:max-h-[85vh] object-contain mx-auto block transition-opacity duration-1000 ease-in-out opacity-100" />
+
+                <!-- Systematic Bottom Fade (proportional to actual image height, Netflix style) -->
+                <div class="absolute bottom-0 left-0 w-full h-1/3 bg-gradient-to-t from-black via-black/70 to-transparent pointer-events-none z-10"></div>
+                <!-- Extra solid line to seamlessly merge with body bg -->
+                <div class="absolute bottom-0 left-0 w-full h-4 bg-black z-20"></div>
             </div>`;
-            
+
             if (validBanners.length > 1) {
                 setInterval(() => {
                     const img = document.getElementById('bannerImg');
                     img.classList.remove('opacity-100');
                     img.classList.add('opacity-0');
-                    
+
                     setTimeout(() => {
                         currentIdx = (currentIdx + 1) % validBanners.length;
                         img.src = validBanners[currentIdx];
                         img.classList.remove('opacity-0');
                         img.classList.add('opacity-100');
-                    }, 500); 
+                    }, 500);
                 }, 4000);
             }
         } else {
