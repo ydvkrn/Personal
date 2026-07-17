@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #000; color: #fff; font-family: 'Inter', sans-serif; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+        .slider-img { animation: fade 1s ease-in-out; }
+        @keyframes fade { from { opacity: 0.4; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="pb-20">
+    <!-- Header -->
+    <header class="flex justify-between items-center p-6 border-b border-neutral-900">
+        <h1 class="text-xl font-bold tracking-widest uppercase">PORTAL</h1>
+        <a href="/admin.html" class="text-sm text-neutral-500 hover:text-white">Admin</a>
+    </header>
+
+    <!-- Banner Slider -->
+    <div id="bannerContainer" class="w-full h-64 md:h-96 relative overflow-hidden bg-neutral-900 flex items-center justify-center">
+        <span class="text-neutral-500">Loading Banner...</span>
+    </div>
+
+    <!-- Quote Section -->
+    <div class="py-12 px-6 text-center border-b border-neutral-900">
+        <p id="quoteText" class="text-xl md:text-2xl font-light italic text-neutral-300">"..."</p>
+    </div>
+
+    <!-- Categories Section -->
+    <main id="categoriesContainer" class="p-6 space-y-12"></main>
+
+    <script>
+        async function loadData() {
+            const res = await fetch('/api/data');
+            const data = await res.json();
+            
+            // 1. Setup Banners
+            const bannerContainer = document.getElementById('bannerContainer');
+            if (data.banners && data.banners.length > 0) {
+                let currentIdx = 0;
+                bannerContainer.innerHTML = `<img src="${data.banners[0]}" class="w-full h-full object-cover slider-img" id="bannerImg" />`;
+                setInterval(() => {
+                    currentIdx = (currentIdx + 1) % data.banners.length;
+                    document.getElementById('bannerImg').src = data.banners[currentIdx];
+                }, 4000); // Slides every 4 seconds
+            }
+
+            // 2. Setup Quote
+            document.getElementById('quoteText').textContent = `"${data.quote || 'Keep pushing forward.'}"`;
+
+            // 3. Setup Categories & Videos
+            const catContainer = document.getElementById('categoriesContainer');
+            const vids = data.videos || [];
+            
+            // Group videos by category
+            const grouped = {};
+            vids.forEach(v => {
+                if(!grouped[v.category]) grouped[v.category] = [];
+                grouped[v.category].push(v);
+            });
+
+            // Render DOM
+            catContainer.innerHTML = '';
+            for (const [catName, catVids] of Object.entries(grouped)) {
+                // Limit to 5
+                const displayVids = catVids.slice(0, 5);
+                const hasMore = catVids.length > 5;
+
+                let cardsHtml = displayVids.map(v => `
+                    <a href="/player.html?id=${v.id}" class="min-w-[260px] md:min-w-[320px] h-40 md:h-48 relative group block flex-shrink-0 bg-neutral-900 rounded-md overflow-hidden snap-start">
+                        <img src="${v.thumb}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                        <div class="absolute bottom-0 left-0 p-4 w-full">
+                            <p class="text-xs text-neutral-400 mb-1">${v.date}</p>
+                            <h3 class="text-sm font-semibold truncate text-white">${v.title}</h3>
+                        </div>
+                    </a>
+                `).join('');
+
+                if (hasMore) {
+                    cardsHtml += `
+                    <a href="/category.html?c=${encodeURIComponent(catName)}" class="min-w-[150px] flex-shrink-0 border border-neutral-800 flex items-center justify-center snap-start rounded-md hover:bg-white hover:text-black transition-colors">
+                        <span class="text-sm font-bold uppercase tracking-widest">View All →</span>
+                    </a>
+                    `;
+                }
+
+                catContainer.innerHTML += `
+                    <section>
+                        <h2 class="text-lg font-bold tracking-widest uppercase mb-4 pl-2 border-l-2 border-white">${catName}</h2>
+                        <div class="flex overflow-x-auto gap-4 hide-scroll snap-x snap-mandatory pb-4">
+                            ${cardsHtml}
+                        </div>
+                    </section>
+                `;
+            }
+        }
+        loadData();
+    </script>
+</body>
+</html>
