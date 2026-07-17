@@ -13,8 +13,6 @@
         .crystal-card { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .crystal-card:hover { border-color: rgba(255, 255, 255, 0.3); box-shadow: 0 0 25px rgba(255, 255, 255, 0.1); transform: translateY(-4px); }
         .red-line { border-left: 3px solid #ff003c; }
-        .slider-img { animation: fade 1.2s ease-in-out; }
-        @keyframes fade { from { opacity: 0.5; } to { opacity: 1; } }
     </style>
 </head>
 <body class="pb-20">
@@ -42,18 +40,48 @@
             const res = await fetch('/api/data');
             const data = await res.json();
             
-            // Setup Adaptive Banner
+            // ==========================================
+            // FIX: Setup Adaptive Banner Logic
+            // ==========================================
             const bannerContainer = document.getElementById('bannerContainer');
-            if (data.banners && data.banners.length > 0) {
+            
+            // 1. Clean Array: Ye line extra space aur khali URLs ko filter kar degi
+            const validBanners = (data.banners || []).filter(url => url && url.trim() !== '');
+
+            if (validBanners.length > 0) {
                 let currentIdx = 0;
-                // object-contain keeps the full image visible on mobile and desktop
-                bannerContainer.innerHTML = `<div class="w-full h-auto max-h-[65vh] relative flex justify-center bg-black">
-                    <img src="${data.banners[0]}" class="w-full h-full object-contain slider-img" id="bannerImg" />
+                
+                // 2. Fixed Height: h-[40vh] (mobile) aur h-[65vh] (PC) lagaya hai taaki loading me banner collapse na ho.
+                // Tailwind ki "transition-opacity" class lagayi hai smooth fade ke liye.
+                bannerContainer.innerHTML = `
+                <div class="w-full h-[40vh] md:h-[65vh] relative flex justify-center bg-black">
+                    <img src="${validBanners[0]}" id="bannerImg" 
+                         class="w-full h-full object-contain transition-opacity duration-500 ease-in-out opacity-100" 
+                         onerror="this.style.opacity='0'" onload="this.style.opacity='1'" />
                 </div>`;
-                setInterval(() => {
-                    currentIdx = (currentIdx + 1) % data.banners.length;
-                    document.getElementById('bannerImg').src = data.banners[currentIdx];
-                }, 4000);
+                
+                // Agar 1 se zyada banner hain toh hi slide chalega
+                if (validBanners.length > 1) {
+                    setInterval(() => {
+                        const img = document.getElementById('bannerImg');
+                        
+                        // Pehle image ko fade out (chupa) do
+                        img.classList.remove('opacity-100');
+                        img.classList.add('opacity-0');
+                        
+                        // 500ms (aadhe second) baad image source change karo aur wapas fade in (dikha) do
+                        setTimeout(() => {
+                            currentIdx = (currentIdx + 1) % validBanners.length;
+                            img.src = validBanners[currentIdx];
+                            
+                            img.classList.remove('opacity-0');
+                            img.classList.add('opacity-100');
+                        }, 500); 
+                    }, 4000);
+                }
+            } else {
+                // Agar admin me ek bhi banner link nahi diya toh banner section hide ho jayega
+                bannerContainer.style.display = 'none';
             }
 
             // Setup Quote
@@ -74,7 +102,6 @@
                 const hasMore = catVids.length > 5;
 
                 let cardsHtml = displayVids.map(v => {
-                    // Instagram style fallback logic: If no thumbnail, use video frame at 1s
                     const mediaElement = v.thumb ? 
                         `<img src="${v.thumb}" class="absolute inset-0 w-full h-full object-cover" />` : 
                         `<video src="${v.url}#t=1" preload="metadata" muted playsinline class="absolute inset-0 w-full h-full object-cover"></video>`;
