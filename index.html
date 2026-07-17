@@ -3,96 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Portal</title>
+    <title>Masoom Ki Diary</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #000; color: #fff; font-family: 'Inter', sans-serif; }
+        body { background-color: #050505; color: #fff; font-family: 'Poppins', sans-serif; overflow-x: hidden; }
         .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-        .slider-img { animation: fade 1s ease-in-out; }
-        @keyframes fade { from { opacity: 0.4; } to { opacity: 1; } }
+        .neon-text { text-shadow: 0 0 10px #00e5ff; color: #00e5ff; }
+        .neon-border-l { border-left: 4px solid #00e5ff; box-shadow: -5px 0 15px -5px #00e5ff; }
+        .video-card { transition: all 0.3s ease; border: 1px solid transparent; }
+        .video-card:hover { border-color: #00e5ff; box-shadow: 0 0 20px rgba(0, 229, 255, 0.3); transform: translateY(-5px); }
+        .slider-img { animation: fade 1.5s ease-in-out; }
+        @keyframes fade { from { opacity: 0.6; } to { opacity: 1; } }
     </style>
 </head>
 <body class="pb-20">
     <!-- Header -->
-    <header class="flex justify-between items-center p-6 border-b border-neutral-900">
-        <h1 class="text-xl font-bold tracking-widest uppercase">PORTAL</h1>
-        <a href="/admin.html" class="text-sm text-neutral-500 hover:text-white">Admin</a>
+    <header class="flex justify-between items-center p-6 bg-black/80 backdrop-blur-md sticky top-0 z-50 border-b border-neutral-800">
+        <h1 class="text-2xl font-extrabold tracking-widest uppercase neon-text">Masoom Ki Diary</h1>
+        <a href="/admin.html" class="text-sm font-semibold text-neutral-400 hover:text-[#00e5ff] transition-colors">Admin Panel</a>
     </header>
 
-    <!-- Banner Slider -->
-    <div id="bannerContainer" class="w-full h-64 md:h-96 relative overflow-hidden bg-neutral-900 flex items-center justify-center">
-        <span class="text-neutral-500">Loading Banner...</span>
+    <!-- Banner Slider (Adaptive Height) -->
+    <div id="bannerContainer" class="w-full aspect-video md:h-[50vh] relative overflow-hidden bg-neutral-900 border-b border-neutral-800">
+        <div class="absolute inset-0 flex items-center justify-center"><span class="text-neutral-500 font-semibold animate-pulse">Loading Diary...</span></div>
     </div>
 
     <!-- Quote Section -->
-    <div class="py-12 px-6 text-center border-b border-neutral-900">
-        <p id="quoteText" class="text-xl md:text-2xl font-light italic text-neutral-300">"..."</p>
+    <div class="py-10 px-6 text-center bg-gradient-to-b from-neutral-900/50 to-transparent">
+        <p id="quoteText" class="text-xl md:text-3xl font-bold italic text-white tracking-wide">"..."</p>
     </div>
 
     <!-- Categories Section -->
-    <main id="categoriesContainer" class="p-6 space-y-12"></main>
+    <main id="categoriesContainer" class="p-6 md:px-12 space-y-16"></main>
 
     <script>
         async function loadData() {
             const res = await fetch('/api/data');
             const data = await res.json();
             
-            // 1. Setup Banners
+            // Setup Banners
             const bannerContainer = document.getElementById('bannerContainer');
             if (data.banners && data.banners.length > 0) {
                 let currentIdx = 0;
-                bannerContainer.innerHTML = `<img src="${data.banners[0]}" class="w-full h-full object-cover slider-img" id="bannerImg" />`;
+                bannerContainer.innerHTML = `<img src="${data.banners[0]}" class="w-full h-full object-cover slider-img opacity-80" id="bannerImg" />
+                                             <div class="absolute inset-0 bg-gradient-to-t from-[#050505] to-transparent"></div>`;
                 setInterval(() => {
                     currentIdx = (currentIdx + 1) % data.banners.length;
                     document.getElementById('bannerImg').src = data.banners[currentIdx];
-                }, 4000); // Slides every 4 seconds
+                }, 4000);
             }
 
-            // 2. Setup Quote
-            document.getElementById('quoteText').textContent = `"${data.quote || 'Keep pushing forward.'}"`;
+            // Setup Quote
+            document.getElementById('quoteText').innerHTML = `<span class="text-[#00e5ff]">"</span>${data.quote || 'Keep pushing forward.'}<span class="text-[#00e5ff]">"</span>`;
 
-            // 3. Setup Categories & Videos
+            // Setup Categories
             const catContainer = document.getElementById('categoriesContainer');
             const vids = data.videos || [];
-            
-            // Group videos by category
             const grouped = {};
             vids.forEach(v => {
                 if(!grouped[v.category]) grouped[v.category] = [];
                 grouped[v.category].push(v);
             });
 
-            // Render DOM
             catContainer.innerHTML = '';
             for (const [catName, catVids] of Object.entries(grouped)) {
-                // Limit to 5
                 const displayVids = catVids.slice(0, 5);
                 const hasMore = catVids.length > 5;
 
                 let cardsHtml = displayVids.map(v => `
-                    <a href="/player.html?id=${v.id}" class="min-w-[260px] md:min-w-[320px] h-40 md:h-48 relative group block flex-shrink-0 bg-neutral-900 rounded-md overflow-hidden snap-start">
-                        <img src="${v.thumb}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent"></div>
+                    <a href="/player.html?id=${v.id}" class="w-[280px] md:w-[360px] aspect-video relative block flex-shrink-0 bg-neutral-900 rounded-xl overflow-hidden snap-start video-card">
+                        <img src="${v.thumb}" class="absolute inset-0 w-full h-full object-cover" />
+                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
                         <div class="absolute bottom-0 left-0 p-4 w-full">
-                            <p class="text-xs text-neutral-400 mb-1">${v.date}</p>
-                            <h3 class="text-sm font-semibold truncate text-white">${v.title}</h3>
+                            <span class="inline-block px-2 py-1 bg-[#00e5ff]/20 text-[#00e5ff] text-[10px] font-bold rounded mb-2">${v.date}</span>
+                            <h3 class="text-base md:text-lg font-bold truncate text-white drop-shadow-md">${v.title}</h3>
                         </div>
                     </a>
                 `).join('');
 
                 if (hasMore) {
                     cardsHtml += `
-                    <a href="/category.html?c=${encodeURIComponent(catName)}" class="min-w-[150px] flex-shrink-0 border border-neutral-800 flex items-center justify-center snap-start rounded-md hover:bg-white hover:text-black transition-colors">
-                        <span class="text-sm font-bold uppercase tracking-widest">View All →</span>
+                    <a href="/category.html?c=${encodeURIComponent(catName)}" class="w-[180px] aspect-video flex-shrink-0 border-2 border-neutral-800 flex flex-col items-center justify-center snap-start rounded-xl hover:border-[#00e5ff] hover:shadow-[0_0_15px_#00e5ff] transition-all text-neutral-400 hover:text-[#00e5ff] group">
+                        <svg class="w-8 h-8 mb-2 group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                        <span class="text-sm font-bold uppercase tracking-widest">View All</span>
                     </a>
                     `;
                 }
 
                 catContainer.innerHTML += `
                     <section>
-                        <h2 class="text-lg font-bold tracking-widest uppercase mb-4 pl-2 border-l-2 border-white">${catName}</h2>
-                        <div class="flex overflow-x-auto gap-4 hide-scroll snap-x snap-mandatory pb-4">
+                        <h2 class="text-2xl font-extrabold tracking-widest uppercase mb-6 pl-4 neon-border-l text-white">${catName}</h2>
+                        <div class="flex overflow-x-auto gap-6 hide-scroll snap-x snap-mandatory pb-6 px-2">
                             ${cardsHtml}
                         </div>
                     </section>
