@@ -3,54 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Control</title>
+    <title>Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style> body { background-color: #000; color: #fff; font-family: 'Inter', sans-serif; } </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #000; color: #fff; font-family: 'Poppins', sans-serif; }
+        .crystal-panel { background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.06); rounded-2xl: 1rem; }
+        .crystal-input { background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 255, 255, 0.1); transition: all 0.2s; }
+        .crystal-input:focus { border-color: #ff003c; box-shadow: 0 0 10px rgba(255, 0, 60, 0.3); outline: none; }
+        .red-btn { background: #ff003c; color: #fff; font-weight: 700; transition: all 0.2s; }
+        .red-btn:hover { background: #fff; color: #000; box-shadow: 0 0 15px rgba(255,255,255,0.3); }
+    </style>
 </head>
-<body class="p-6 md:p-12 max-w-5xl mx-auto">
-    <header class="flex justify-between items-center mb-12 border-b border-neutral-800 pb-4">
-        <h1 class="text-2xl font-bold tracking-widest">CONTROL PANEL</h1>
-        <a href="/" class="text-sm text-neutral-400 hover:text-white">Exit →</a>
+<body class="p-4 md:p-10 max-w-6xl mx-auto">
+    <header class="flex justify-between items-center mb-10 border-b border-white/5 pb-5">
+        <div>
+            <h1 class="text-2xl font-extrabold tracking-widest text-white">DIARY CONTROL</h1>
+            <p class="text-[10px] tracking-widest text-neutral-500 font-bold uppercase mt-0.5">Masoom Ki Diary</p>
+        </div>
+        <a href="/" class="text-xs font-bold bg-white/5 border border-white/10 px-4 py-2 rounded-lg hover:bg-white hover:text-black transition-all">VIEW SITE →</a>
     </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-        <!-- Site Config -->
-        <section class="space-y-6">
-            <h2 class="text-lg uppercase tracking-widest border-b border-neutral-800 pb-2">Site Config</h2>
-            
-            <div>
-                <label class="block text-xs text-neutral-400 mb-2">Banners (Comma separated URLs)</label>
-                <textarea id="bannersInput" class="w-full bg-neutral-900 border border-neutral-800 p-3 text-sm focus:border-white outline-none" rows="3"></textarea>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- New Video Form -->
+        <section class="crystal-panel p-6 rounded-2xl">
+            <h2 class="text-sm font-extrabold tracking-widest uppercase mb-5 text-[#ff003c]">➕ PUBLISH NEW REEL</h2>
+            <div class="space-y-4">
+                <input type="text" id="vTitle" placeholder="Video Title" class="w-full crystal-input rounded-xl p-3 text-sm text-white font-semibold">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="date" id="vDate" class="w-full crystal-input rounded-xl p-3 text-sm text-white">
+                    <input type="text" id="vCat" placeholder="Category (e.g. Study)" class="w-full crystal-input rounded-xl p-3 text-sm text-white font-semibold">
+                </div>
+                <input type="url" id="vUrl" placeholder="Video MP4 URL (Required)" class="w-full crystal-input rounded-xl p-3 text-sm text-white">
+                <input type="url" id="vThumb" placeholder="Thumbnail Image URL (Leave blank for Auto-Frame)" class="w-full crystal-input rounded-xl p-3 text-sm text-white">
+                <p class="text-[10px] text-neutral-500 font-semibold pl-1">* If Thumbnail is left blank, browser will automatically capture the 1st frame from the video track.</p>
+                <button onclick="addVideo()" class="w-full py-3.5 rounded-xl red-btn text-xs uppercase tracking-widest mt-2">Publish Now</button>
             </div>
-            
-            <div>
-                <label class="block text-xs text-neutral-400 mb-2">Daily Quote</label>
-                <input type="text" id="quoteInput" class="w-full bg-neutral-900 border border-neutral-800 p-3 text-sm focus:border-white outline-none">
-            </div>
-
-            <button onclick="saveConfig()" class="w-full bg-white text-black py-3 font-bold hover:bg-neutral-300">UPDATE CONFIG</button>
         </section>
 
-        <!-- Add Video -->
-        <section class="space-y-6">
-            <h2 class="text-lg uppercase tracking-widest border-b border-neutral-800 pb-2">Add New Video</h2>
-            
-            <input type="text" id="vTitle" placeholder="Video Title" class="w-full bg-neutral-900 border border-neutral-800 p-3 text-sm focus:border-white outline-none">
-            
-            <div class="grid grid-cols-2 gap-4">
-                <input type="date" id="vDate" class="w-full bg-neutral-900 border border-neutral-800 p-3 text-sm focus:border-white outline-none text-neutral-400">
-                <input type="text" id="vCat" placeholder="Category (e.g. Study)" class="w-full bg-neutral-900 border border-neutral-800 p-3 text-sm focus:border-white outline-none">
+        <!-- Configuration Form -->
+        <section class="crystal-panel p-6 rounded-2xl h-fit">
+            <h2 class="text-sm font-extrabold tracking-widest uppercase mb-5 text-[#ff003c]">⚙️ GLOBAL CONFIG</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-neutral-400 mb-1.5 uppercase tracking-wider">Sliding Banners (Comma separated URLs)</label>
+                    <textarea id="bannersInput" class="w-full crystal-input rounded-xl p-3 text-xs text-white" rows="2"></textarea>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-neutral-400 mb-1.5 uppercase tracking-wider">Dynamic Homepage Quote</label>
+                    <input type="text" id="quoteInput" class="w-full crystal-input rounded-xl p-3 text-sm text-white font-semibold">
+                </div>
+                <button onclick="saveConfig()" class="w-full py-3.5 rounded-xl bg-white text-black font-extrabold text-xs uppercase tracking-widest hover:bg-neutral-200 transition-all">Save Config</button>
             </div>
-            
-            <input type="text" id="vUrl" placeholder="Video File URL (.mp4)" class="w-full bg-neutral-900 border border-neutral-800 p-3 text-sm focus:border-white outline-none">
-            <input type="text" id="vThumb" placeholder="Thumbnail Image URL" class="w-full bg-neutral-900 border border-neutral-800 p-3 text-sm focus:border-white outline-none">
-            
-            <button onclick="addVideo()" class="w-full bg-white text-black py-3 font-bold hover:bg-neutral-300">PUBLISH VIDEO</button>
         </section>
     </div>
 
-    <!-- Status Box -->
-    <div id="statusBox" class="fixed bottom-6 right-6 bg-white text-black px-6 py-3 font-bold hidden shadow-lg"></div>
+    <!-- Management Section -->
+    <section class="mt-8 crystal-panel p-6 rounded-2xl">
+        <h2 class="text-sm font-extrabold tracking-widest uppercase mb-5 text-[#ff003c]">📂 ARCHIVE MANAGEMENT</h2>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs whitespace-nowrap">
+                <thead class="bg-white/5 text-neutral-400 uppercase tracking-wider">
+                    <tr>
+                        <th class="px-4 py-3 rounded-l-xl">Media Grid</th>
+                        <th class="px-4 py-3">Meta Info</th>
+                        <th class="px-4 py-3">Category</th>
+                        <th class="px-4 py-3 rounded-r-xl text-right">Delete Action</th>
+                    </tr>
+                </thead>
+                <tbody id="videoList" class="divide-y divide-white/5"></tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- Crystal Toast -->
+    <div id="statusBox" class="fixed top-6 right-6 bg-white text-black px-5 py-3 font-bold text-xs rounded-xl hidden shadow-xl z-50 tracking-widest"></div>
 
     <script>
         let db = { banners: [], quote: "", videos: [] };
@@ -60,23 +87,21 @@
             db = await res.json();
             document.getElementById('bannersInput').value = (db.banners || []).join(',');
             document.getElementById('quoteInput').value = db.quote || '';
+            renderVideoList();
         }
 
-        function showStatus(msg) {
+        function showStatus(msg, isError = false) {
             const box = document.getElementById('statusBox');
             box.textContent = msg;
+            box.className = `fixed top-6 right-6 px-5 py-3 font-bold text-xs rounded-xl shadow-2xl z-50 transition-all ${isError ? 'bg-[#ff003c] text-white' : 'bg-white text-black'}`;
             box.classList.remove('hidden');
             setTimeout(() => box.classList.add('hidden'), 3000);
         }
 
         async function pushData() {
-            const res = await fetch('/api/data', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(db)
-            });
-            if(res.ok) showStatus("Update Successful ✓");
-            else showStatus("Error Updating!");
+            const res = await fetch('/api/data', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(db) });
+            if(res.ok) { showStatus("CHANGES SYNCED SUCCESSFULLY"); renderVideoList(); }
+            else showStatus("SYNC FAILURE!", true);
         }
 
         function saveConfig() {
@@ -88,23 +113,49 @@
 
         function addVideo() {
             const vid = {
-                id: Date.now().toString(), // Generate unique ID
+                id: Date.now().toString(),
                 title: document.getElementById('vTitle').value,
                 date: document.getElementById('vDate').value,
                 category: document.getElementById('vCat').value,
                 url: document.getElementById('vUrl').value,
                 thumb: document.getElementById('vThumb').value
             };
-
-            if(!vid.title || !vid.url || !vid.category) {
-                alert("Please fill required fields (Title, Category, URL)"); return;
-            }
-
-            db.videos.unshift(vid); // Adds to top
+            if(!vid.title || !vid.url || !vid.category) { showStatus("MISSING DATA FIELDS", true); return; }
+            if(!db.videos) db.videos = [];
+            db.videos.unshift(vid);
             pushData();
-
-            // Clear fields
             ['vTitle', 'vCat', 'vUrl', 'vThumb'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        function renderVideoList() {
+            const tbody = document.getElementById('videoList');
+            if(!db.videos || db.videos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-neutral-600 font-bold tracking-widest">ARCHIVE IS EMPTY</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = db.videos.map(v => {
+                // Same Instagram-style smart preview for Admin list
+                const previewMedia = v.thumb ? 
+                    `<img src="${v.thumb}" class="h-12 w-10 object-cover rounded-md">` : 
+                    `<video src="${v.url}#t=1" preload="metadata" muted class="h-12 w-10 object-cover rounded-md"></video>`;
+
+                return `
+                <tr class="hover:bg-white/5 transition-colors">
+                    <td class="px-4 py-3">${previewMedia}</td>
+                    <td class="px-4 py-3"><p class="font-bold text-white">${v.title}</p><p class="text-[10px] text-neutral-500 font-bold">${v.date || 'REEL'}</p></td>
+                    <td class="px-4 py-3"><span class="bg-white/5 border border-white/10 text-white px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wide">${v.category}</span></td>
+                    <td class="px-4 py-3 text-right">
+                        <button onclick="deleteVideo('${v.id}')" class="bg-white/5 text-neutral-400 border border-white/10 hover:bg-[#ff003c] hover:text-white hover:border-[#ff003c] px-3 py-1.5 rounded-md font-bold text-[10px] tracking-widest transition-all">REMOVE</button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+
+        function deleteVideo(id) {
+            if(confirm("Permanently delete this entry?")) {
+                db.videos = db.videos.filter(v => v.id !== id);
+                pushData();
+            }
         }
 
         loadAdmin();
