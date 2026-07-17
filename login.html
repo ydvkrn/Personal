@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Access Restricted</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style> body { background-color: #000; color: #fff; font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="h-screen flex items-center justify-center">
+    <div class="w-full max-w-sm p-8 text-center">
+        <h1 class="text-2xl font-bold mb-6 tracking-widest uppercase">Restricted</h1>
+        <form id="loginForm" class="space-y-4">
+            <input type="password" id="passcode" maxlength="8" placeholder="Enter 8-Digit Code" required
+                class="w-full bg-transparent border-b border-neutral-700 text-center text-2xl py-2 focus:outline-none focus:border-white transition-colors">
+            <button type="submit" id="submitBtn" class="w-full bg-white text-black font-bold py-3 mt-4 hover:bg-neutral-300 transition-colors">
+                ENTER PLATFORM
+            </button>
+            <p id="errorMsg" class="text-red-500 text-sm hidden mt-2"></p>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const error = document.getElementById('errorMsg');
+            const pass = document.getElementById('passcode').value;
+            
+            btn.textContent = "VERIFYING...";
+            btn.disabled = true;
+
+            const res = await fetch('/api/auth', {
+                method: 'POST',
+                body: JSON.stringify({ passcode: pass }),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (res.ok) {
+                window.location.href = '/';
+            } else {
+                error.textContent = "Incorrect Passcode.";
+                error.classList.remove('hidden');
+                btn.textContent = "ENTER PLATFORM";
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
