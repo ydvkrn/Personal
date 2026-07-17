@@ -3,20 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Access Restricted</title>
+    <title>Masoom Ki Diary - Login</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style> body { background-color: #000; color: #fff; font-family: 'Inter', sans-serif; } </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #050505; color: #fff; font-family: 'Poppins', sans-serif; }
+        .neon-text { text-shadow: 0 0 10px #00e5ff, 0 0 20px #00e5ff; color: #00e5ff; }
+        .neon-input:focus { box-shadow: 0 0 15px #00e5ff; border-color: #00e5ff; outline: none; }
+        .neon-btn { border: 2px solid #00e5ff; box-shadow: 0 0 10px #00e5ff inset, 0 0 10px #00e5ff; transition: all 0.3s ease; }
+        .neon-btn:hover { background-color: #00e5ff; color: #000; box-shadow: 0 0 25px #00e5ff inset, 0 0 25px #00e5ff; }
+    </style>
 </head>
-<body class="h-screen flex items-center justify-center">
-    <div class="w-full max-w-sm p-8 text-center">
-        <h1 class="text-2xl font-bold mb-6 tracking-widest uppercase">Restricted</h1>
-        <form id="loginForm" class="space-y-4">
-            <input type="password" id="passcode" maxlength="8" placeholder="Enter 8-Digit Code" required
-                class="w-full bg-transparent border-b border-neutral-700 text-center text-2xl py-2 focus:outline-none focus:border-white transition-colors">
-            <button type="submit" id="submitBtn" class="w-full bg-white text-black font-bold py-3 mt-4 hover:bg-neutral-300 transition-colors">
-                ENTER PLATFORM
+<body class="h-screen flex items-center justify-center bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-neutral-900 to-black">
+    <div class="w-full max-w-md p-10 bg-black/50 border border-neutral-800 rounded-2xl backdrop-blur-md shadow-2xl text-center">
+        <h1 class="text-3xl font-extrabold mb-8 uppercase tracking-widest neon-text">Masoom Ki Diary</h1>
+        <form id="loginForm" class="space-y-6">
+            <input type="password" id="passcode" maxlength="8" placeholder="Enter Secret Passcode" required
+                class="w-full bg-black border border-neutral-700 text-center text-2xl py-3 rounded-lg text-white tracking-[0.5em] neon-input transition-all">
+            <button type="submit" id="submitBtn" class="w-full text-[#00e5ff] font-bold text-lg py-3 rounded-lg neon-btn uppercase tracking-wider">
+                Unlock Diary
             </button>
-            <p id="errorMsg" class="text-red-500 text-sm hidden mt-2"></p>
+            <p id="errorMsg" class="text-red-500 font-semibold text-sm hidden mt-2"></p>
         </form>
     </div>
 
@@ -28,21 +35,16 @@
             const pass = document.getElementById('passcode').value;
             
             btn.textContent = "VERIFYING...";
-            btn.disabled = true;
-
             const res = await fetch('/api/auth', {
-                method: 'POST',
-                body: JSON.stringify({ passcode: pass }),
+                method: 'POST', body: JSON.stringify({ passcode: pass }),
                 headers: { 'Content-Type': 'application/json' }
             });
 
-            if (res.ok) {
-                window.location.href = '/';
-            } else {
-                error.textContent = "Incorrect Passcode.";
+            if (res.ok) window.location.href = '/';
+            else {
+                error.textContent = "Incorrect Passcode!";
                 error.classList.remove('hidden');
-                btn.textContent = "ENTER PLATFORM";
-                btn.disabled = false;
+                btn.textContent = "UNLOCK DIARY";
             }
         });
     </script>
