@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style> body { background-color: #000; color: #fff; font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="p-6 md:p-12 max-w-5xl mx-auto">
+    <header class="flex justify-between items-center mb-12 border-b border-neutral-800 pb-4">
+        <h1 class="text-2xl font-bold tracking-widest">CONTROL PANEL</h1>
+        <a href="/" class="text-sm text-neutral-400 hover:text-white">Exit →</a>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <!-- Site Config -->
+        <section class="space-y-6">
+            <h2 class="text-lg uppercase tracking-widest border-b border-neutral-800 pb-2">Site Config</h2>
+            
+            <div>
+                <label class="block text-xs text-neutral-400 mb-2">Banners (Comma separated URLs)</label>
+                <textarea id="bannersInput" class="w-full bg-neutral-900 border border-neutral-800 p-3 text-sm focus:border-white outline-none" rows="3"></textarea>
+            </div>
+            
+            <div>
+                <label class="block text-xs text-neutral-400 mb-2">Daily Quote</label>
+                <input type="text" id="quoteInput" class="w-full bg-neutral-900 border border-neutral-800 p-3 text-sm focus:border-white outline-none">
+            </div>
+
+            <button onclick="saveConfig()" class="w-full bg-white text-black py-3 font-bold hover:bg-neutral-300">UPDATE CONFIG</button>
+        </section>
+
+        <!-- Add Video -->
+        <section class="space-y-6">
+            <h2 class="text-lg uppercase tracking-widest border-b border-neutral-800 pb-2">Add New Video</h2>
+            
+            <input type="text" id="vTitle" placeholder="Video Title" class="w-full bg-neutral-900 border border-neutral-800 p-3 text-sm focus:border-white outline-none">
+            
+            <div class="grid grid-cols-2 gap-4">
+                <input type="date" id="vDate" class="w-full bg-neutral-900 border border-neutral-800 p-3 text-sm focus:border-white outline-none text-neutral-400">
+                <input type="text" id="vCat" placeholder="Category (e.g. Study)" class="w-full bg-neutral-900 border border-neutral-800 p-3 text-sm focus:border-white outline-none">
+            </div>
+            
+            <input type="text" id="vUrl" placeholder="Video File URL (.mp4)" class="w-full bg-neutral-900 border border-neutral-800 p-3 text-sm focus:border-white outline-none">
+            <input type="text" id="vThumb" placeholder="Thumbnail Image URL" class="w-full bg-neutral-900 border border-neutral-800 p-3 text-sm focus:border-white outline-none">
+            
+            <button onclick="addVideo()" class="w-full bg-white text-black py-3 font-bold hover:bg-neutral-300">PUBLISH VIDEO</button>
+        </section>
+    </div>
+
+    <!-- Status Box -->
+    <div id="statusBox" class="fixed bottom-6 right-6 bg-white text-black px-6 py-3 font-bold hidden shadow-lg"></div>
+
+    <script>
+        let db = { banners: [], quote: "", videos: [] };
+
+        async function loadAdmin() {
+            const res = await fetch('/api/data');
+            db = await res.json();
+            document.getElementById('bannersInput').value = (db.banners || []).join(',');
+            document.getElementById('quoteInput').value = db.quote || '';
+        }
+
+        function showStatus(msg) {
+            const box = document.getElementById('statusBox');
+            box.textContent = msg;
+            box.classList.remove('hidden');
+            setTimeout(() => box.classList.add('hidden'), 3000);
+        }
+
+        async function pushData() {
+            const res = await fetch('/api/data', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(db)
+            });
+            if(res.ok) showStatus("Update Successful ✓");
+            else showStatus("Error Updating!");
+        }
+
+        function saveConfig() {
+            const b = document.getElementById('bannersInput').value;
+            db.banners = b ? b.split(',').map(s => s.trim()) : [];
+            db.quote = document.getElementById('quoteInput').value;
+            pushData();
+        }
+
+        function addVideo() {
+            const vid = {
+                id: Date.now().toString(), // Generate unique ID
+                title: document.getElementById('vTitle').value,
+                date: document.getElementById('vDate').value,
+                category: document.getElementById('vCat').value,
+                url: document.getElementById('vUrl').value,
+                thumb: document.getElementById('vThumb').value
+            };
+
+            if(!vid.title || !vid.url || !vid.category) {
+                alert("Please fill required fields (Title, Category, URL)"); return;
+            }
+
+            db.videos.unshift(vid); // Adds to top
+            pushData();
+
+            // Clear fields
+            ['vTitle', 'vCat', 'vUrl', 'vThumb'].forEach(id => document.getElementById(id).value = '');
+        }
+
+        loadAdmin();
+    </script>
+</body>
+</html>
