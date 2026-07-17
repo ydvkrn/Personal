@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style> body { background-color: #000; color: #fff; font-family: 'Inter', sans-serif; } </style>
+</head>
+<body>
+    <header class="p-6 border-b border-neutral-900 flex items-center gap-4">
+        <a href="/" class="text-neutral-500 hover:text-white">← Back</a>
+        <h1 id="catTitle" class="text-xl font-bold tracking-widest uppercase">Category</h1>
+    </header>
+
+    <main class="p-6">
+        <div id="gridContainer" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6"></div>
+    </main>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const catName = urlParams.get('c');
+        document.getElementById('catTitle').textContent = catName || 'ALL VIDEOS';
+
+        async function loadCategory() {
+            const res = await fetch('/api/data');
+            const data = await res.json();
+            const grid = document.getElementById('gridContainer');
+            
+            const vids = (data.videos || []).filter(v => v.category === catName);
+            
+            grid.innerHTML = vids.map(v => `
+                <a href="/player.html?id=${v.id}" class="w-full aspect-video relative group block bg-neutral-900 rounded-md overflow-hidden">
+                    <img src="${v.thumb}" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-4 w-full">
+                        <p class="text-xs text-neutral-400 mb-1">${v.date}</p>
+                        <h3 class="text-sm font-semibold truncate">${v.title}</h3>
+                    </div>
+                </a>
+            `).join('');
+        }
+        loadCategory();
+    </script>
+</body>
+</html>
