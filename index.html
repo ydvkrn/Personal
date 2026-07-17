@@ -35,106 +35,102 @@
     <!-- Main Content -->
     <main id="categoriesContainer" class="p-6 md:px-12 space-y-16"></main>
 
-    <script>
-        async function loadData() {
-            const res = await fetch('/api/data');
-            const data = await res.json();
+   <!-- index.html ka Script aur Banner Section -->
+<script>
+    async function loadData() {
+        // FIX 1: Cache buster lagaya hai (Date.now) taaki delete hone ke baad humesha fresh data load ho
+        const res = await fetch('/api/data?t=' + Date.now());
+        const data = await res.json();
+        
+        const bannerContainer = document.getElementById('bannerContainer');
+        const validBanners = (data.banners || []).filter(url => url && url.trim() !== '');
+
+        if (validBanners.length > 0) {
+            let currentIdx = 0;
             
-            // ==========================================
-            // FIX: Setup Adaptive Banner Logic
-            // ==========================================
-            const bannerContainer = document.getElementById('bannerContainer');
+            // FIX 2: Cinematic Fade & Full Width
+            // h-full w-full object-cover = Full Screen Width
+            // bg-gradient-to-t = Niche se upar tak black fade effect
+            bannerContainer.innerHTML = `
+            <div class="w-full h-[55vh] md:h-[75vh] relative bg-black overflow-hidden">
+                <img src="${validBanners[0]}" id="bannerImg" 
+                     class="absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-1000 ease-in-out opacity-100" />
+                
+                <!-- Professional Bottom Fade (Netflix Style) -->
+                <div class="absolute bottom-0 left-0 w-full h-2/3 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none z-10"></div>
+                <!-- Extra solid dark line at absolute bottom to match body bg -->
+                <div class="absolute bottom-0 left-0 w-full h-6 bg-black z-20"></div>
+            </div>`;
             
-            // 1. Clean Array: Ye line extra space aur khali URLs ko filter kar degi
-            const validBanners = (data.banners || []).filter(url => url && url.trim() !== '');
-
-            if (validBanners.length > 0) {
-                let currentIdx = 0;
-                
-                // 2. Fixed Height: h-[40vh] (mobile) aur h-[65vh] (PC) lagaya hai taaki loading me banner collapse na ho.
-                // Tailwind ki "transition-opacity" class lagayi hai smooth fade ke liye.
-                bannerContainer.innerHTML = `
-                <div class="w-full h-[40vh] md:h-[65vh] relative flex justify-center bg-black">
-                    <img src="${validBanners[0]}" id="bannerImg" 
-                         class="w-full h-full object-contain transition-opacity duration-500 ease-in-out opacity-100" 
-                         onerror="this.style.opacity='0'" onload="this.style.opacity='1'" />
-                </div>`;
-                
-                // Agar 1 se zyada banner hain toh hi slide chalega
-                if (validBanners.length > 1) {
-                    setInterval(() => {
-                        const img = document.getElementById('bannerImg');
-                        
-                        // Pehle image ko fade out (chupa) do
-                        img.classList.remove('opacity-100');
-                        img.classList.add('opacity-0');
-                        
-                        // 500ms (aadhe second) baad image source change karo aur wapas fade in (dikha) do
-                        setTimeout(() => {
-                            currentIdx = (currentIdx + 1) % validBanners.length;
-                            img.src = validBanners[currentIdx];
-                            
-                            img.classList.remove('opacity-0');
-                            img.classList.add('opacity-100');
-                        }, 500); 
-                    }, 4000);
-                }
-            } else {
-                // Agar admin me ek bhi banner link nahi diya toh banner section hide ho jayega
-                bannerContainer.style.display = 'none';
+            if (validBanners.length > 1) {
+                setInterval(() => {
+                    const img = document.getElementById('bannerImg');
+                    img.classList.remove('opacity-100');
+                    img.classList.add('opacity-0');
+                    
+                    setTimeout(() => {
+                        currentIdx = (currentIdx + 1) % validBanners.length;
+                        img.src = validBanners[currentIdx];
+                        img.classList.remove('opacity-0');
+                        img.classList.add('opacity-100');
+                    }, 500); 
+                }, 4000);
             }
-
-            // Setup Quote
-            document.getElementById('quoteText').textContent = data.quote ? `"${data.quote}"` : `"Keep it simple, keep it raw."`;
-
-            // Setup Categories
-            const catContainer = document.getElementById('categoriesContainer');
-            const vids = data.videos || [];
-            const grouped = {};
-            vids.forEach(v => {
-                if(!grouped[v.category]) grouped[v.category] = [];
-                grouped[v.category].push(v);
-            });
-
-            catContainer.innerHTML = '';
-            for (const [catName, catVids] of Object.entries(grouped)) {
-                const displayVids = catVids.slice(0, 5);
-                const hasMore = catVids.length > 5;
-
-                let cardsHtml = displayVids.map(v => {
-                    const mediaElement = v.thumb ? 
-                        `<img src="${v.thumb}" class="absolute inset-0 w-full h-full object-cover" />` : 
-                        `<video src="${v.url}#t=1" preload="metadata" muted playsinline class="absolute inset-0 w-full h-full object-cover"></video>`;
-
-                    return `
-                    <a href="/player.html?id=${v.id}" class="w-[260px] md:w-[320px] aspect-[4/5] relative block flex-shrink-0 rounded-2xl overflow-hidden snap-start crystal-card">
-                        ${mediaElement}
-                        <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
-                        <div class="absolute bottom-0 left-0 p-5 w-full">
-                            <span class="inline-block px-2 py-0.5 bg-[#ff003c] text-white text-[9px] font-extrabold rounded mb-2 uppercase tracking-widest">${v.date || 'REEL'}</span>
-                            <h3 class="text-sm font-bold text-white tracking-wide truncate">${v.title}</h3>
-                        </div>
-                    </a>`;
-                }).join('');
-
-                if (hasMore) {
-                    cardsHtml += `
-                    <a href="/category.html?c=${encodeURIComponent(catName)}" class="w-[160px] aspect-[4/5] flex-shrink-0 bg-white/5 border border-white/10 flex flex-col items-center justify-center snap-start rounded-2xl hover:border-white transition-all text-neutral-400 hover:text-white">
-                        <span class="text-xs font-bold uppercase tracking-widest">View All →</span>
-                    </a>`;
-                }
-
-                catContainer.innerHTML += `
-                    <section>
-                        <h2 class="text-xl font-extrabold tracking-widest uppercase mb-6 pl-3 red-line text-white">${catName}</h2>
-                        <div class="flex overflow-x-auto gap-6 hide-scroll snap-x snap-mandatory pb-4">
-                            ${cardsHtml}
-                        </div>
-                    </section>
-                `;
-            }
+        } else {
+            bannerContainer.style.display = 'none';
         }
-        loadData();
-    </script>
+
+        // Setup Quote
+        document.getElementById('quoteText').textContent = data.quote ? `"${data.quote}"` : `"Keep it simple, keep it raw."`;
+
+        // Setup Categories (Same as before...)
+        const catContainer = document.getElementById('categoriesContainer');
+        const vids = data.videos || [];
+        const grouped = {};
+        vids.forEach(v => {
+            if(!grouped[v.category]) grouped[v.category] = [];
+            grouped[v.category].push(v);
+        });
+
+        catContainer.innerHTML = '';
+        for (const [catName, catVids] of Object.entries(grouped)) {
+            const displayVids = catVids.slice(0, 5);
+            const hasMore = catVids.length > 5;
+
+            let cardsHtml = displayVids.map(v => {
+                const mediaElement = v.thumb ? 
+                    `<img src="${v.thumb}" class="absolute inset-0 w-full h-full object-cover" />` : 
+                    `<video src="${v.url}#t=1" preload="metadata" muted playsinline class="absolute inset-0 w-full h-full object-cover"></video>`;
+
+                return `
+                <a href="/player.html?id=${v.id}" class="w-[260px] md:w-[320px] aspect-[4/5] relative block flex-shrink-0 rounded-2xl overflow-hidden snap-start crystal-card">
+                    ${mediaElement}
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent"></div>
+                    <div class="absolute bottom-0 left-0 p-5 w-full z-10">
+                        <span class="inline-block px-2 py-0.5 bg-[#ff003c] text-white text-[9px] font-extrabold rounded mb-2 uppercase tracking-widest">${v.date || 'REEL'}</span>
+                        <h3 class="text-sm font-bold text-white tracking-wide truncate">${v.title}</h3>
+                    </div>
+                </a>`;
+            }).join('');
+
+            if (hasMore) {
+                cardsHtml += `
+                <a href="/category.html?c=${encodeURIComponent(catName)}" class="w-[160px] aspect-[4/5] flex-shrink-0 bg-white/5 border border-white/10 flex flex-col items-center justify-center snap-start rounded-2xl hover:border-white transition-all text-neutral-400 hover:text-white">
+                    <span class="text-xs font-bold uppercase tracking-widest">View All →</span>
+                </a>`;
+            }
+
+            catContainer.innerHTML += `
+                <section class="relative z-20 -mt-4">
+                    <h2 class="text-xl font-extrabold tracking-widest uppercase mb-6 pl-3 red-line text-white">${catName}</h2>
+                    <div class="flex overflow-x-auto gap-6 hide-scroll snap-x snap-mandatory pb-4">
+                        ${cardsHtml}
+                    </div>
+                </section>
+            `;
+        }
+    }
+    loadData();
+</script>
 </body>
 </html>
